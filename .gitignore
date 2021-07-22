@@ -1,0 +1,9 @@
+node_modules
+uploads
+dist
+dist-ssr
+.DS_Store
+.env
+*.lock
+*.log
+*.local
