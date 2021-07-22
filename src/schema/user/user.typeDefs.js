@@ -8,9 +8,9 @@ const userTypeDefs = gql`
     }
 
     type Mutation {
-        signin(input: UserLogin): Token
+        login(input: UserLogin): Token
         refreshLogin(refreshToken: String): Token
-        addUser(input: UserInput): Token
+        register(input: UserInput): Token
         updateUser(input: UserInput): User
         deleteUser(id: ID): User
     }
@@ -40,7 +40,7 @@ const userTypeDefs = gql`
     input UserLogin {
         email: String!
         password: String!
-        expire: Boolean
+        remember: Boolean
     }
 `
 

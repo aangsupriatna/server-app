@@ -59,7 +59,6 @@ const startApolloServer = async () => {
             console.log(`🚀 Server ready at http://localhost:${process.env.PORT}`);
             console.log(`😷 Health checks available at http://localhost:${process.env.PORT}/.well-known/apollo/server-health`);
         });
-        resolve(app);
     });
 
     return { server, app };

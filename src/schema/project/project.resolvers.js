@@ -3,6 +3,7 @@ const Project = require("../../model/project");
 const projectResolvers = {
     Query: {
         project: async (parent, { id }, req) => {
+            console.log(req)
             const result = await Project.findById(id);
             return result
         },

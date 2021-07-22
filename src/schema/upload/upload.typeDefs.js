@@ -7,7 +7,7 @@ const uploadTypeDefs = gql`
         singleUpload(file: Upload!): File!
         multiUpload(files: [Upload!]!): [File!]!
     }
-
+    
     extend type Query {
         uploads: [File!]!
     }

@@ -2,8 +2,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../../model/user');
 
-const createTokens = async (user, secret, expire) => {
-    const tokenExpire = expire ? '7d' : '20m';
+const createTokens = async (user, secret, remember) => {
+    const tokenExpire = remember ? '7d' : '20m';
 
     const createAccessToken = jwt.sign(
         {
@@ -41,15 +41,16 @@ const userResolvers = {
     },
 
     Mutation: {
-        signin: async (parent, { input }, req) => {
-            const { email, password, expire } = input;
+        login: async (parent, { input }, req) => {
+            const { email, password, remember } = input;
+            console.log(input)
             const user = await User.findOne({ email: email }).exec();
             if (!user) throw Error("User doesn't exists");
 
             if (!bcrypt.compareSync(password, user.password))
                 throw Error("Unable to verify credentials");
 
-            const [accessToken, refreshToken] = await createTokens(user, process.env.JWT_KEY, expire);
+            const [accessToken, refreshToken] = await createTokens(user, process.env.JWT_KEY, remember);
             return {
                 accessToken,
                 refreshToken,
@@ -72,7 +73,7 @@ const userResolvers = {
                 user
             }
         },
-        addUser: async (parent, { input }, req) => {
+        register: async (parent, { input }, req) => {
             const { username, email, password } = input
             if (!username && !email && !password) throw Error("Credentials required");
             try {
