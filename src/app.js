@@ -19,11 +19,13 @@ const startApolloServer = async () => {
             }
             try {
                 const token = authorization.split(' ')[1]
-                user = jwt.verify(token, process.env.JWT_KEY);
+                user = jwt.decode(token);
+                console.log(user)
                 user.isAuth = true
             } catch (error) {
                 user.isAuth = false;
                 user = {};
+                console.log(error)
                 throw new AuthenticationError("Auth error")
             }
             if (!user) {
