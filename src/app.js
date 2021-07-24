@@ -10,6 +10,7 @@ const startApolloServer = async () => {
         schema,
         context: ({ req, res }) => {
             const { authorization } = req.headers
+            // console.log(authorization);
             let user = {}
             if (!authorization) {
                 user.isAuth = false;

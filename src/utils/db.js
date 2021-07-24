@@ -8,7 +8,8 @@ const connection = mongoose.connect(process.env.MONGODB_URI, {
     bufferMaxEntries: 0,
     keepAlive: 120,
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useFindAndModify: false,
 });
 
 mongoose.set('useCreateIndex', true);

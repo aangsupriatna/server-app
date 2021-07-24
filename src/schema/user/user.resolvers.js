@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../../model/user');
+const { AuthenticationError } = require('apollo-server-express');
 
 const createTokens = async (user, secret, remember) => {
-    const tokenExpire = remember ? '7d' : '20m';
-
+    const tokenExpire = remember ? '7d' : '2m';
     const createAccessToken = jwt.sign(
         {
             data: {
@@ -43,14 +43,14 @@ const userResolvers = {
     Mutation: {
         login: async (parent, { input }, req) => {
             const { email, password, remember } = input;
-            console.log(input)
             const user = await User.findOne({ email: email }).exec();
-            if (!user) throw Error("User doesn't exists");
+            if (!user) throw new AuthenticationError("User doesn't exists");
 
             if (!bcrypt.compareSync(password, user.password))
-                throw Error("Unable to verify credentials");
+                throw new AuthenticationError("Unable to verify credentials");
 
-            const [accessToken, refreshToken] = await createTokens(user, process.env.JWT_KEY, remember);
+            const refreshSecret = process.env.JWT_KEY + user.password;
+            const [accessToken, refreshToken] = await createTokens(user, refreshSecret, remember);
             return {
                 accessToken,
                 refreshToken,
@@ -60,12 +60,23 @@ const userResolvers = {
         refreshLogin: async (parent, { refreshToken }, req) => {
             let userId = -1
             try {
-                const { data: { id } } = await jwt.verify(refreshToken, process.env.JWT_KEY);
+                const { data: { id } } = await jwt.decode(refreshToken);
                 userId = id
             } catch (error) {
                 throw Error(error);
             }
+
+            if (!userId) return {}
+
             const user = await User.findById(userId).exec();
+            if (!user) return {}
+
+            const refreshSecret = process.env.JWT_KEY + user.password;
+            try {
+                jwt.verify(refreshToken, refreshSecret);
+            } catch (error) {
+                throw Error(error);
+            }
             const [newAccessToken, newRefreshToken] = await createTokens(user, process.env.JWT_KEY);
             return {
                 accessToken: newAccessToken,
@@ -73,12 +84,23 @@ const userResolvers = {
                 user
             }
         },
+        forgetPassword: async (parent, { email, newPassword }, req) => {
+            try {
+                await User.findOne({ email: email }).then(async (user) => {
+                    await User.findByIdAndUpdate(user.id, { password: newPassword });
+                });
+                return true
+            } catch (error) {
+                return false
+            }
+        },
         register: async (parent, { input }, req) => {
             const { username, email, password } = input
             if (!username && !email && !password) throw Error("Credentials required");
             try {
                 const user = await new User(input).save();
-                const [newAccessToken, newRefreshToken] = await createTokens(user, process.env.JWT_KEY);
+                const refreshSecret = process.env.JWT_KEY + user.password;
+                const [newAccessToken, newRefreshToken] = await createTokens(user, refreshSecret);
                 return {
                     accessToken: newAccessToken,
                     refreshToken: newRefreshToken,

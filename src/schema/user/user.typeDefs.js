@@ -10,6 +10,7 @@ const userTypeDefs = gql`
     type Mutation {
         login(input: UserLogin): Token
         refreshLogin(refreshToken: String): Token
+        forgetPassword(email: String, newPassword: String): Boolean!
         register(input: UserInput): Token
         updateUser(input: UserInput): User
         deleteUser(id: ID): User
