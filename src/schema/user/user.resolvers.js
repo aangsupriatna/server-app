@@ -77,7 +77,7 @@ const userResolvers = {
             } catch (error) {
                 throw Error(error);
             }
-            const [newAccessToken, newRefreshToken] = await createTokens(user, process.env.JWT_KEY);
+            const [newAccessToken, newRefreshToken] = await createTokens(user, refreshSecret);
             return {
                 accessToken: newAccessToken,
                 refreshToken: newRefreshToken,
